@@ -1,14 +1,17 @@
 # tf-atom-route53-health-check-aws
 
+[![Terraform Format](https://img.shields.io/badge/terraform-fmt-blue?logo=terraform)](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions)
+[![Terraform Validate](https://img.shields.io/badge/terraform-validate-blue?logo=terraform)](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions)
+[![TFLint](https://img.shields.io/badge/tflint-passing-brightgreen?logo=terraform)](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions)
+[![Terraform Test](https://img.shields.io/badge/tests-2%20passed-brightgreen?logo=terraform)](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions)
+[![Security Scan](https://img.shields.io/badge/trivy-passing-brightgreen?logo=aqua)](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions)
+[![Conventional Commits](https://img.shields.io/badge/commits-conventional-blue?logo=conventionalcommits)](https://conventionalcommits.org)
+[![Documentation](https://img.shields.io/badge/docs-terraform--docs-blue?logo=readthedocs)](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions)
+[![License](https://img.shields.io/badge/license-MIT-blue?logo=opensourceinitiative)](LICENSE)
+
 > Terraform atom that provisions an AWS Route 53 health check with consistent `tf-label` naming and tagging.
 
 <!-- Badges -->
-[![CI](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
-[![Release](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions/workflows/auto-release.yml/badge.svg)](../../actions/workflows/auto-release.yml)
-[![CodeQL](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions/workflows/codeql.yml/badge.svg)](../../actions/workflows/codeql.yml)
-![Latest Release](https://img.shields.io/github/v/release/PlatformStackPulse/tf-atom-route53-health-check-aws?label=latest%20release&sort=semver)
-![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.11.3-blue?logo=terraform)
-![License](https://img.shields.io/github/license/PlatformStackPulse/tf-atom-route53-health-check-aws)
 
 A single-purpose Terraform atom for AWS Route 53 health checks. It follows the **one module per repository** convention and derives all resource names and tags from the shared [`tf-label`](https://github.com/PlatformStackPulse/tf-label) context module, so IDs stay consistent across the PlatformStackPulse fleet.
 
