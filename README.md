@@ -1,30 +1,28 @@
-# Terraform Module Template
+# tf-atom-route53-health-check-aws
 
-<!-- Badges: Update REPO_OWNER/REPO_NAME after creating from template -->
-[![CI](https://github.com/PlatformStackPulse/terraform-atom-molecule-module-template/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
-[![Release](https://github.com/PlatformStackPulse/terraform-atom-molecule-module-template/actions/workflows/auto-release.yml/badge.svg)](../../actions/workflows/auto-release.yml)
-[![CodeQL](https://github.com/PlatformStackPulse/terraform-atom-molecule-module-template/actions/workflows/codeql.yml/badge.svg)](../../actions/workflows/codeql.yml)
-[![Changelog](https://github.com/PlatformStackPulse/terraform-atom-molecule-module-template/actions/workflows/changelog.yml/badge.svg)](../../actions/workflows/changelog.yml)
-![Latest Release](https://img.shields.io/github/v/release/PlatformStackPulse/terraform-atom-molecule-module-template?label=latest%20release&sort=semver)
-![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.6.0-blue?logo=terraform)
-![License](https://img.shields.io/github/license/PlatformStackPulse/terraform-atom-molecule-module-template)
+> Terraform atom that provisions an AWS Route 53 health check with consistent `tf-label` naming and tagging.
 
-A production-ready template for creating Terraform modules following the **one module per repository** best practice, with built-in CI/CD, security scanning, testing, documentation generation, and publishing to public registries.
+<!-- Badges -->
+[![CI](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![Release](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions/workflows/auto-release.yml/badge.svg)](../../actions/workflows/auto-release.yml)
+[![CodeQL](https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws/actions/workflows/codeql.yml/badge.svg)](../../actions/workflows/codeql.yml)
+![Latest Release](https://img.shields.io/github/v/release/PlatformStackPulse/tf-atom-route53-health-check-aws?label=latest%20release&sort=semver)
+![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.11.3-blue?logo=terraform)
+![License](https://img.shields.io/github/license/PlatformStackPulse/tf-atom-route53-health-check-aws)
+
+A single-purpose Terraform atom for AWS Route 53 health checks. It follows the **one module per repository** convention and derives all resource names and tags from the shared [`tf-label`](https://github.com/PlatformStackPulse/tf-label) context module, so IDs stay consistent across the PlatformStackPulse fleet.
 
 ## Features
 
-- **One Module Per Repo** — Module lives at the root; no nested `modules/` directory
-- **Registry Publishing** — Auto-publish to Terraform Registry, Artifactory, or GitLab on release
-- **Native Terraform Testing** — `terraform test` with mock providers (no external tools)
+- **Route 53 health check atom** — a focused building block, composed into higher-level molecules/cells
+- **tf-label naming** — deterministic `namespace-stage-name` IDs and normalized tags via `module.this`
+- **`enabled` toggle** — set `enabled = false` to disable the module and create no resources
+- **Native Terraform Testing** — `terraform test` unit tests with a mock AWS provider (no external tools, no AWS calls)
 - **Security Scanning** — Trivy IaC scanning for HIGH/CRITICAL vulnerabilities
-- **Linting** — TFLint with AWS ruleset (preset "all")
-- **Auto Documentation** — terraform-docs generates README sections on every commit
-- **GitHub Actions CI/CD** — Workflows for the full module lifecycle
-- **Auto Release** — CI passes on main → auto-tag → GitHub Release created
-- **Pre-Commit Hooks** — Format, validate, lint, docs, and security on every commit
-- **Conventional Commits** — Enforced commit message format
-- **Semantic Versioning** — Automated version management and releases
-- **DevContainer** — VS Code remote development ready
+- **Linting** — TFLint with the AWS ruleset (preset "all")
+- **Auto Documentation** — terraform-docs regenerates the inputs/outputs table on every commit
+- **GitHub Actions CI/CD** — format, validate, lint, test, security, docs, and auto-release
+- **Conventional Commits + Semantic Versioning** — automated version management and releases
 
 ## CI Pipeline
 
@@ -77,15 +75,14 @@ See [TEMPLATE_GUIDE.md](TEMPLATE_GUIDE.md) for detailed instructions.
 
 ## Usage
 
-### From GitHub
-
 ```hcl
-module "this" {
-  source = "github.com/PlatformStackPulse/terraform-aws-my-module?ref=v1.0.0"
+module "route53_health_check" {
+  source = "git::https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws.git?ref=v1.0.0"
 
-  name        = "my-resource"
-  environment = "dev"
-  namespace   = "myorg"
+  # tf-label identity (required for deterministic naming)
+  namespace = "eg"
+  stage     = "test"
+  name      = "thing"
 
   tags = {
     Project = "example"
@@ -94,21 +91,16 @@ module "this" {
 }
 ```
 
-### From Terraform Registry
+Disable the module without removing the block:
 
 ```hcl
-module "this" {
-  source  = "PlatformStackPulse/my-module/aws"
-  version = "~> 1.0"
+module "route53_health_check" {
+  source = "git::https://github.com/PlatformStackPulse/tf-atom-route53-health-check-aws.git?ref=v1.0.0"
 
-  name        = "my-resource"
-  environment = "dev"
-  namespace   = "myorg"
-
-  tags = {
-    Project = "example"
-    Owner   = "platform-engineering"
-  }
+  enabled   = false
+  namespace = "eg"
+  stage     = "test"
+  name      = "thing"
 }
 ```
 
@@ -312,6 +304,30 @@ No resources.
 |------|-------------|
 | <a name="output_enabled"></a> [enabled](#output\_enabled) | Whether the module is enabled. |
 <!-- END_TF_DOCS -->
+
+## Tests
+
+Unit tests use Terraform's native test framework with a **mock AWS provider** — no
+real AWS resources are created and no credentials are required. They assert on
+plan-known values (the `tf-label` id string and input pass-throughs), so they run
+fast and deterministically in CI.
+
+```bash
+# Run unit tests (mock provider)
+terraform init -backend=false
+terraform test -test-directory=tests/unit
+
+# Or via the Makefile
+make test-unit
+```
+
+| Test | Command | What it checks |
+|------|---------|----------------|
+| `creates_when_enabled` | `plan` | `enabled == true`, id is `eg-test-thing`, tags reflect the label inputs |
+| `disabled_creates_nothing` | `plan` (`enabled = false`) | `enabled == false` and the id is empty when disabled |
+
+Integration tests (real AWS) live in `tests/integration/` and are opt-in — run
+`terraform test -test-directory=tests/integration` with valid AWS credentials.
 
 ## Learning Materials
 
