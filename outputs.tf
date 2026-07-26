@@ -4,11 +4,11 @@ output "enabled" {
 }
 
 output "id" {
-  description = "The tf-label generated ID used for resource naming (e.g. \"namespace-stage-name\")."
-  value       = module.this.id
+  description = "The id of the Route53 health check."
+  value       = try(aws_route53_health_check.this[0].id, null)
 }
 
-output "tags" {
-  description = "The normalized tags map produced by tf-label, applied to all resources."
-  value       = local.tags
+output "arn" {
+  description = "The ARN of the Route53 health check."
+  value       = try(aws_route53_health_check.this[0].arn, null)
 }
